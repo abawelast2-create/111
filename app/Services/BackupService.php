@@ -94,7 +94,7 @@ class BackupService
             foreach ($rows as $row) {
                 $values = array_map(function ($val) {
                     if ($val === null) return 'NULL';
-                    return "'" . addslashes((string) $val) . "'";
+                    return \DB::connection()->getPdo()->quote((string) $val);
                 }, (array) $row);
                 $sql .= "INSERT INTO `{$tableName}` VALUES (" . implode(',', $values) . ");\n";
             }

@@ -1,0 +1,590 @@
+openapi: 3.0.3
+info:
+  title: نظام الحضور والانصراف API
+  description: |
+    واجهة برمجة تطبيقات نظام الحضور والانصراف الإلكتروني v4.0.
+    
+    ## المصادقة
+    - **الموظفين**: يتم تحديد الهوية عبر `token` فريد لكل موظف
+    - **المدراء**: جلسة (Session) بعد تسجيل الدخول من `/admin/login.php`
+    - **الأجهزة**: بصمة الجهاز `device_fingerprint` + رقم PIN
+    
+    ## الأمان
+    - حماية CSRF على جميع الطلبات
+    - Rate Limiting: 60 طلب/دقيقة للموظفين، 30 طلب/دقيقة لMAPI
+    - جميع الاتصالات عبر HTTPS
+  version: 4.0.0
+  contact:
+    name: فريق التطوير
+
+servers:
+  - url: /sys_3/api
+    description: الإنتاج
+
+tags:
+  - name: Authentication
+    description: تسجيل الدخول والمصادقة
+  - name: Attendance
+    description: تسجيل الحضور والانصراف
+  - name: Employee
+    description: بيانات الموظفين
+  - name: Overtime
+    description: العمل الإضافي
+  - name: Dashboard
+    description: لوحة التحكم والتقارير الفورية
+  - name: Reports
+    description: التقارير والتصدير
+  - name: System
+    description: صحة النظام والإعدادات
+
+paths:
+  /auth-device.php:
+    post:
+      tags: [Authentication]
+      summary: تسجيل جهاز جديد
+      description: يتحقق من بصمة الجهاز ويسجله إذا كان جديداً
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [employee_token, device_fingerprint]
+              properties:
+                employee_token:
+                  type: string
+                  description: رمز الموظف الفريد
+                device_fingerprint:
+                  type: string
+                  description: بصمة الجهاز (SHA-256)
+      responses:
+        '200':
+          description: الجهاز مسجل أو تم التسجيل
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '403':
+          description: جهاز غير معروف - بحاجة لموافقة
+        '429':
+          description: تجاوز الحد المسموح
+
+  /auth-pin.php:
+    post:
+      tags: [Authentication]
+      summary: تسجيل دخول برقم PIN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pin]
+              properties:
+                pin:
+                  type: string
+                  description: رقم PIN المكون من 6 أرقام
+                  example: "123456"
+      responses:
+        '200':
+          description: نجاح المصادقة
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  employee:
+                    $ref: '#/components/schemas/Employee'
+        '401':
+          description: رقم PIN خاطئ
+
+  /check-in.php:
+    post:
+      tags: [Attendance]
+      summary: تسجيل حضور
+      description: يسجل حضور الموظف مع إحداثيات GPS وبصمة الجهاز
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, latitude, longitude, device_fingerprint]
+              properties:
+                token:
+                  type: string
+                  description: رمز الموظف
+                latitude:
+                  type: number
+                  format: double
+                  description: خط العرض
+                  example: 24.7136
+                longitude:
+                  type: number
+                  format: double
+                  description: خط الطول
+                  example: 46.6753
+                device_fingerprint:
+                  type: string
+                  description: بصمة الجهاز
+      responses:
+        '200':
+          description: تم تسجيل الحضور
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  late_minutes:
+                    type: integer
+                    description: دقائق التأخير (0 إذا لم يتأخر)
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          description: بيانات ناقصة أو خطأ
+        '403':
+          description: خارج نطاق الموقع أو جهاز غير معروف
+        '409':
+          description: تم التسجيل مسبقاً
+
+  /check-out.php:
+    post:
+      tags: [Attendance]
+      summary: تسجيل انصراف
+      description: يسجل انصراف الموظف
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, latitude, longitude, device_fingerprint]
+              properties:
+                token:
+                  type: string
+                latitude:
+                  type: number
+                  format: double
+                longitude:
+                  type: number
+                  format: double
+                device_fingerprint:
+                  type: string
+      responses:
+        '200':
+          description: تم تسجيل الانصراف
+        '400':
+          description: لم يتم تسجيل حضور اليوم
+
+  /get-employee.php:
+    get:
+      tags: [Employee]
+      summary: جلب بيانات موظف
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: رمز الموظف
+      responses:
+        '200':
+          description: بيانات الموظف
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        '404':
+          description: الموظف غير موجود
+
+  /overtime.php:
+    post:
+      tags: [Overtime]
+      summary: بدء عمل إضافي
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, latitude, longitude]
+              properties:
+                token:
+                  type: string
+                latitude:
+                  type: number
+                  format: double
+                longitude:
+                  type: number
+                  format: double
+      responses:
+        '200':
+          description: تم بدء العمل الإضافي
+
+  /overtime-end.php:
+    post:
+      tags: [Overtime]
+      summary: إنهاء عمل إضافي
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, latitude, longitude]
+              properties:
+                token:
+                  type: string
+                latitude:
+                  type: number
+                  format: double
+                longitude:
+                  type: number
+                  format: double
+      responses:
+        '200':
+          description: تم إنهاء العمل الإضافي
+
+  /realtime-dashboard.php:
+    get:
+      tags: [Dashboard]
+      summary: بيانات لوحة التحكم الفورية
+      description: |
+        يُستدعى كل 15 ثانية من لوحة التحكم عبر AJAX.
+        يحتاج جلسة مدير نشطة.
+      responses:
+        '200':
+          description: بيانات اللوحة
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  stats:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      present:
+                        type: integer
+                      absent:
+                        type: integer
+                      late:
+                        type: integer
+                  recent:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        type:
+                          type: string
+                          enum: [in, out]
+                        time:
+                          type: string
+                        branch:
+                          type: string
+        '401':
+          description: غير مسجل الدخول
+
+  /realtime-attendance.php:
+    get:
+      tags: [Dashboard]
+      summary: بيانات الحضور الفورية
+      description: تحديث جزئي لجدول الحضور
+      parameters:
+        - name: since
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: آخر تحديث معروف
+      responses:
+        '200':
+          description: السجلات الجديدة
+
+  /submit-report.php:
+    post:
+      tags: [Reports]
+      summary: إرسال تقرير سري
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [token, report_text]
+              properties:
+                token:
+                  type: string
+                report_text:
+                  type: string
+                  description: نص التقرير
+                report_type:
+                  type: string
+                  enum: [violation, suggestion, complaint, other]
+                  default: violation
+                image:
+                  type: string
+                  format: binary
+                  description: صورة مرفقة (اختياري)
+      responses:
+        '200':
+          description: تم إرسال التقرير
+
+  /export.php:
+    get:
+      tags: [Reports]
+      summary: تصدير تقرير الحضور
+      description: يتطلب جلسة مدير. يدعم CSV, Excel, JSON, طباعة.
+      parameters:
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [csv, excel, json, print]
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: branch_id
+          in: query
+          schema:
+            type: integer
+        - name: employee_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ملف التصدير
+        '401':
+          description: غير مسجل الدخول
+
+  /preferences.php:
+    post:
+      tags: [System]
+      summary: حفظ تفضيلات المستخدم
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dark_mode:
+                  type: boolean
+                language:
+                  type: string
+                  enum: [ar, en]
+      responses:
+        '200':
+          description: تم الحفظ
+
+  /leave-add.php:
+    post:
+      tags: [Reports]
+      summary: إضافة إجازة
+      description: يتطلب جلسة مدير
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [employee_id, leave_type, start_date, end_date, csrf_token]
+              properties:
+                employee_id:
+                  type: integer
+                leave_type:
+                  type: string
+                  enum: [annual, sick, unpaid, other]
+                start_date:
+                  type: string
+                  format: date
+                end_date:
+                  type: string
+                  format: date
+                reason:
+                  type: string
+                csrf_token:
+                  type: string
+      responses:
+        '302':
+          description: إعادة توجيه بعد الحفظ
+
+  /health.php:
+    get:
+      tags: [System]
+      summary: فحص صحة النظام
+      description: يتحقق من اتصال قاعدة البيانات وحالة الخدمات
+      responses:
+        '200':
+          description: النظام يعمل
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unhealthy]
+                  database:
+                    type: boolean
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /verify-device.php:
+    post:
+      tags: [Authentication]
+      summary: التحقق من جهاز
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, device_fingerprint]
+              properties:
+                token:
+                  type: string
+                device_fingerprint:
+                  type: string
+      responses:
+        '200':
+          description: الجهاز محقق
+
+  /whatsapp.php:
+    post:
+      tags: [System]
+      summary: إرسال رسالة واتساب
+      description: إرسال إشعار عبر واتساب API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to:
+                  type: string
+                  description: رقم الهاتف
+                message:
+                  type: string
+      responses:
+        '200':
+          description: تم الإرسال
+
+components:
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          example: أحمد محمد
+        job_title:
+          type: string
+        phone:
+          type: string
+        branch_id:
+          type: integer
+        branch_name:
+          type: string
+        is_active:
+          type: boolean
+        token:
+          type: string
+          description: رمز الموظف الفريد
+
+    Attendance:
+      type: object
+      properties:
+        id:
+          type: integer
+        employee_id:
+          type: integer
+        type:
+          type: string
+          enum: [in, out, overtime-start, overtime-end]
+        attendance_date:
+          type: string
+          format: date
+        timestamp:
+          type: string
+          format: date-time
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        late_minutes:
+          type: integer
+        device_fingerprint:
+          type: string
+
+    Leave:
+      type: object
+      properties:
+        id:
+          type: integer
+        employee_id:
+          type: integer
+        leave_type:
+          type: string
+          enum: [annual, sick, unpaid, other]
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        reason:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        approved_by:
+          type: integer
+        created_at:
+          type: string
+          format: date-time

@@ -30,7 +30,7 @@ class BranchController extends Controller
             'check_out_end_time'   => 'required',
         ]);
 
-        $branch = Branch::create($request->all());
+        $branch = Branch::create($request->validated());
         AuditLog::record('add_branch', "إضافة فرع: {$branch->name}", $branch->id);
 
         return redirect()->route('admin.branches.index')->with('success', 'تمت إضافة الفرع بنجاح');
@@ -51,7 +51,7 @@ class BranchController extends Controller
             'check_out_end_time'   => 'required',
         ]);
 
-        $branch->update($request->all());
+        $branch->update($request->validated());
         AuditLog::record('edit_branch', "تعديل فرع: {$branch->name}", $branch->id);
 
         return redirect()->route('admin.branches.index')->with('success', 'تم تحديث بيانات الفرع');

@@ -19,7 +19,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [
+        'https://mycorner.site',
+        'https://www.mycorner.site',
+    ],
 
     'allowed_origins_patterns' => [],
 

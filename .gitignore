@@ -17,3 +17,9 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Debug/deploy scripts (contain credentials)
+*.py
+DEPLOYMENT_COMPLETE.md
+DEPLOYMENT_GUIDE_AR.md
+FINAL_STEPS_AR.md

@@ -6,6 +6,8 @@
     <meta name="theme-color" content="#F1F5F9">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/loogo.png') }}">
     <title>تسجيل الحضور - {{ config('app.name') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('assets/images/loogo.png') }}">
     <link rel="stylesheet" href="{{ asset('assets/fonts/tajawal.css') }}">
@@ -116,6 +118,12 @@
         updateHidden();
         if (hidden.value.length !== 4) { e.preventDefault(); inputs[0].focus(); }
     });
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('{{ asset('sw.js') }}').catch(() => {});
+        });
+    }
     </script>
 </body>
 </html>

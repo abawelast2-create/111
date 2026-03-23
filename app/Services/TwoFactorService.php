@@ -107,7 +107,7 @@ class TwoFactorService
      */
     public static function verifyRecoveryCode(Admin $admin, string $code): bool
     {
-        $codes = json_decode($admin->two_factor_recovery_codes, true) ?? [];
+        $codes = json_decode(decrypt($admin->two_factor_recovery_codes), true) ?? [];
         $index = array_search($code, $codes, true);
 
         if ($index === false) {
@@ -116,7 +116,7 @@ class TwoFactorService
 
         // إزالة الرمز المستخدم
         unset($codes[$index]);
-        $admin->update(['two_factor_recovery_codes' => json_encode(array_values($codes))]);
+        $admin->update(['two_factor_recovery_codes' => encrypt(json_encode(array_values($codes)))]);
 
         return true;
     }

@@ -29,6 +29,8 @@ Route::prefix('admin')->group(function () {
         Route::post('employees/{id}/restore', [Admin\EmployeeController::class, 'restore'])->name('admin.employees.restore');
         Route::post('employees/{employee}/regenerate-pin', [Admin\EmployeeController::class, 'regeneratePin'])->name('admin.employees.regenerate-pin');
         Route::post('employees/{employee}/reset-device', [Admin\EmployeeController::class, 'resetDevice'])->name('admin.employees.reset-device');
+        Route::get('employees/{employee}/profile', [Admin\EmployeeProfileController::class, 'show'])->name('admin.employees.profile');
+        Route::get('documents-expiry', [Admin\EmployeeProfileController::class, 'documentsExpiry'])->name('admin.documents-expiry');
 
         // الفروع
         Route::get('branches', [Admin\BranchController::class, 'index'])->name('admin.branches.index');
@@ -58,23 +60,23 @@ Route::prefix('admin')->group(function () {
         Route::get('report-charts', [Admin\ReportController::class, 'reportCharts'])->name('admin.report-charts');
 
         // التحليلات المتقدمة
-        Route::get('analytics', [Admin\AnalyticsController::class, 'index'])->name('admin.analytics');
+        Route::get('analytics', [Admin\AnalyticsController::class, 'index'])->name('admin.analytics.index');
         Route::get('analytics/data', [Admin\AnalyticsController::class, 'data'])->name('admin.analytics.data');
 
         // الإشعارات
-        Route::get('notifications', [Admin\NotificationController::class, 'index'])->name('admin.notifications');
+        Route::get('notifications', [Admin\NotificationController::class, 'index'])->name('admin.notifications.index');
         Route::post('notifications/mark-all-read', [Admin\NotificationController::class, 'markAllRead'])->name('admin.notifications.mark-all-read');
         Route::post('notifications/{notification}/mark-read', [Admin\NotificationController::class, 'markRead'])->name('admin.notifications.mark-read');
         Route::get('notifications/unread-count', [Admin\NotificationController::class, 'unreadCount'])->name('admin.notifications.unread-count');
 
         // النسخ الاحتياطي
-        Route::get('backups', [Admin\BackupController::class, 'index'])->name('admin.backups');
+        Route::get('backups', [Admin\BackupController::class, 'index'])->name('admin.backups.index');
         Route::post('backups', [Admin\BackupController::class, 'create'])->name('admin.backups.create');
         Route::get('backups/{backup}/download', [Admin\BackupController::class, 'download'])->name('admin.backups.download');
         Route::delete('backups/{backup}', [Admin\BackupController::class, 'destroy'])->name('admin.backups.destroy');
 
         // Webhooks
-        Route::get('webhooks', [Admin\WebhookController::class, 'index'])->name('admin.webhooks');
+        Route::get('webhooks', [Admin\WebhookController::class, 'index'])->name('admin.webhooks.index');
         Route::post('webhooks', [Admin\WebhookController::class, 'store'])->name('admin.webhooks.store');
         Route::put('webhooks/{webhook}', [Admin\WebhookController::class, 'update'])->name('admin.webhooks.update');
         Route::delete('webhooks/{webhook}', [Admin\WebhookController::class, 'destroy'])->name('admin.webhooks.destroy');

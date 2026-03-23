@@ -59,6 +59,9 @@
                 </td>
                 <td>
                     <div class="actions-wrap" style="display:flex;gap:4px;flex-wrap:wrap">
+                        <a class="btn btn-sm btn-secondary" href="{{ route('admin.employees.profile', $emp) }}" title="بروفايل الموظف">
+                            <x-icon name="attendance" :size="14"/>
+                        </a>
                         <button class="btn btn-sm btn-secondary" onclick="editEmployee({{ json_encode($emp) }})">
                             <x-icon name="edit" :size="14"/>
                         </button>

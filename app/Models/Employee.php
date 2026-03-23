@@ -14,7 +14,7 @@ class Employee extends Model
 
     protected $fillable = [
         'name', 'job_title', 'pin', 'pin_changed_at', 'pin_expires_at', 'pin_rotation_days',
-        'phone', 'unique_token', 'branch_id', 'device_fingerprint',
+        'phone', 'unique_token', 'profile_photo', 'branch_id', 'device_fingerprint',
         'device_registered_at', 'device_bind_mode', 'security_level', 'is_active',
         'flexible_start_time', 'flexible_end_time', 'flexible_window_minutes',
         'hire_date', 'termination_date', 'employment_status',
@@ -79,6 +79,11 @@ class Employee extends Model
     public function timeEntries(): HasMany
     {
         return $this->hasMany(TimeEntry::class);
+    }
+
+    public function documentGroups(): HasMany
+    {
+        return $this->hasMany(EmpDocumentGroup::class, 'employee_id')->orderBy('sort_order')->orderBy('id');
     }
 
     public function history(): HasMany

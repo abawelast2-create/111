@@ -37,10 +37,11 @@
             // Save to server if logged in
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
             if (csrfToken) {
-                fetch(window.SITE_URL + '/api/preferences.php', {
+                fetch(window.SITE_URL + '/api/preferences', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': csrfToken
                     },
                     body: JSON.stringify({ key: 'dark_mode', value: isDark ? '1' : '0' })
@@ -152,7 +153,7 @@
 
             if (remaining <= 0) {
                 clearInterval(this.checkInterval);
-                window.location.href = (window.SITE_URL || '') + '/admin/login.php?expired=1';
+                window.location.href = (window.SITE_URL || '') + '/admin/login?expired=1';
                 return;
             }
 
@@ -172,7 +173,7 @@
 
         extend() {
             // Ping server to refresh session
-            fetch((window.SITE_URL || '') + '/api/health.php', { credentials: 'same-origin' })
+            fetch((window.SITE_URL || '') + '/api/health', { credentials: 'same-origin' })
                 .then(() => {
                     this.lastActivity = Date.now();
                     this.warningElement.style.display = 'none';

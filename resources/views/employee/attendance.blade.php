@@ -6,6 +6,8 @@
     <meta name="theme-color" content="#F1F5F9">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/loogo.png') }}">
     <title>{{ $employee->name }} - الحضور</title>
     <link rel="icon" type="image/png" href="{{ asset('assets/images/loogo.png') }}">
     <link rel="stylesheet" href="{{ asset('assets/fonts/tajawal.css') }}">
@@ -167,6 +169,12 @@ const CONFIG = {
     apiUrl: '{{ url('/api') }}',
     csrfToken: '{{ csrf_token() }}'
 };
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('{{ asset('sw.js') }}').catch(() => {});
+    });
+}
 </script>
 <script src="{{ asset('assets/js/radar.js') }}"></script>
 </body>

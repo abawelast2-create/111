@@ -7,7 +7,7 @@ use App\Http\Controllers\Api;
 Route::post('auth-pin', [Api\AuthController::class, 'authByPin'])->middleware('throttle:10,1');
 Route::post('auth-device', [Api\AuthController::class, 'authByDevice'])->middleware('throttle:20,1');
 Route::post('verify-device', [Api\AuthController::class, 'verifyDevice'])->middleware('throttle:30,1');
-Route::get('get-employee', [Api\AuthController::class, 'getEmployee']);
+Route::get('get-employee', [Api\AuthController::class, 'getEmployee'])->middleware('throttle:30,1');
 
 // =================== تسجيل الحضور والانصراف ===================
 Route::post('check-in', Api\CheckInController::class)->middleware('throttle:30,1');
@@ -21,6 +21,7 @@ Route::post('overtime-end', [Api\OvertimeController::class, 'end'])->middleware(
 // =================== البلاغات والإجازات ===================
 Route::post('submit-report', [Api\ReportController::class, 'submitReport'])->middleware('throttle:10,60');
 Route::post('leave-add', [Api\ReportController::class, 'addLeave'])->middleware('admin.auth');
+Route::get('serve-file', [Api\ProfileController::class, 'serveFile']);
 
 // =================== مسارات تحتاج صلاحية المدير ===================
 Route::middleware('admin.auth')->group(function () {
@@ -30,6 +31,10 @@ Route::middleware('admin.auth')->group(function () {
     Route::post('send-all-links', [Api\WhatsAppController::class, 'sendAll']);
     Route::post('regenerate-tokens', [Api\WhatsAppController::class, 'regenerateTokens']);
     Route::post('whatsapp', [Api\WhatsAppController::class, 'generateLink']);
+    Route::post('profile-action', [Api\ProfileController::class, 'profileAction']);
+    Route::post('upload-profile', [Api\ProfileController::class, 'uploadProfile']);
+    Route::get('get-group-files', [Api\ProfileController::class, 'getGroupFiles']);
+    Route::post('preferences', [Api\ProfileController::class, 'savePreferences']);
 });
 
 // =================== API عام (Sanctum) ===================

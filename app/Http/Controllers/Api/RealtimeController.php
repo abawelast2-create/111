@@ -104,13 +104,14 @@ class RealtimeController extends Controller
         }
 
         $records = $query->latest('timestamp')->get();
-        $format = $request->query('format', 'csv');
+        $format = strtolower((string) $request->query('format', 'csv'));
 
-        if ($format === 'json') {
-            return response()->json(ExportService::exportJson($records));
-        }
-
-        return ExportService::exportCsv($records, 'attendance_' . now()->format('Y-m-d') . '.csv');
+        return match ($format) {
+            'json' => response()->json(ExportService::exportJson($records)),
+            'excel', 'xls' => ExportService::exportExcel($records, 'attendance_' . now()->format('Y-m-d') . '.xls'),
+            'print' => ExportService::exportPrint($records),
+            default => ExportService::exportCsv($records, 'attendance_' . now()->format('Y-m-d') . '.csv'),
+        };
     }
 
     public function health(): JsonResponse

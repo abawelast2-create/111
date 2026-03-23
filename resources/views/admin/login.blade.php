@@ -127,6 +127,13 @@
             <div class="brand-sub">لوحة تحكم المدير</div>
         </div>
 
+        @if(session('error'))
+        <div class="alert-error">
+            <x-icon name="absent" :size="18"/>
+            {{ session('error') }}
+        </div>
+        @endif
+
         @if($errors->any())
         <div class="{{ ($isLocked ?? false) ? 'alert-locked' : 'alert-error' }}">
             <x-icon name="{{ ($isLocked ?? false) ? 'lock' : 'absent' }}" :size="18"/>

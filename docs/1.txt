@@ -7,7 +7,7 @@
 
 ## ما هو هذا النظام؟
 
-نظام **سَهر** (Sarh.io) هو تطبيق ويب يُدار من الهاتف أو الحاسوب لتسجيل حضور وانصراف الموظفين بدون الحاجة لأجهزة بصمة تقليدية. يعتمد على:
+نظام **سَهر** (mycorner.site) هو تطبيق ويب يُدار من الهاتف أو الحاسوب لتسجيل حضور وانصراف الموظفين بدون الحاجة لأجهزة بصمة تقليدية. يعتمد على:
 
 - **الموقع الجغرافي (GPS):** يتحقق أن الموظف موجود فعلاً في مقر العمل
 - **رمز PIN شخصي:** رقم سري من 4 خانات يُعطى لكل موظف
@@ -21,7 +21,7 @@
 
 #### الخطوة 1: فتح الرابط
 - افتح الرابط الذي أرسله لك المدير عبر واتساب
-- أو ادخل على **sarh.io** مباشرة
+- أو ادخل على **mycorner.site** مباشرة
 
 #### الخطوة 2: إدخال رمز PIN
 - ستظهر لك شاشة بها 4 مربعات
@@ -81,7 +81,7 @@
 
 ### الدخول للوحة التحكم
 
-1. ادخل على **sarh.io/admin/login**
+1. ادخل على **mycorner.site/admin/login**
 2. أدخل اسم المستخدم وكلمة المرور
 3. يمكنك تفعيل "تذكرني" للبقاء مسجلاً 30 يوماً
 
@@ -338,11 +338,11 @@
 
 ### 1.1 — الموظف يفتح الرابط
 
-**الموظف** يفتح `sarh.io` → النظام يعيد التوجيه إلى `/employee`
+**الموظف** يفتح `mycorner.site` → النظام يعيد التوجيه إلى `/employee`
 
 **ما يحدث تقنياً:**
 ```
-GET sarh.io → 302 Redirect → /employee
+GET mycorner.site → 302 Redirect → /employee
 GET /employee → يُعرض نموذج إدخال PIN
 ```
 
@@ -1737,7 +1737,7 @@ new ──→ reviewed ──→ in_progress ──→ resolved
 ## نظرة عامة
 
 ```
-Framework:  Laravel 11
+Framework:  Laravel 10
 PHP:        8.3+
 Database:   MariaDB / MySQL
 Frontend:   Blade Templates + Vanilla JS
@@ -1746,6 +1746,20 @@ Charts:     Chart.js 4.4.7
 CSS:        Custom (لا يوجد Bootstrap/Tailwind)
 Auth:       Session-based (Admin) + Token-based (Employee/API)
 ```
+
+### ملاحظة إنتاج مهمة (مارس 2026)
+
+- تم تضمين `StartSession` و `EncryptCookies` ضمن مجموعة `api` middleware حتى تعمل مسارات `/api/*` المحمية بـ `admin.auth` من داخل لوحة المدير (Dashboard realtime).
+- تم إصلاح مفاتيح flash messages في القالب (`session('success')` بدلاً من `session('flash_success')`)
+- تم تحويل أزرار تسجيل الخروج إلى `<form method="POST">` بدلاً من `<a href>` (GET)
+- تم إصلاح `TwoFactorService::verifyRecoveryCode()` ليستخدم `decrypt()` قبل `json_decode()`
+- تم إصلاح شارة الإشعارات لاستخدام `Admin::class` بدلاً من `'admin'` في `notifiable_type`
+- تم استبدال `$request->all()` بـ `$request->validated()` في `BranchController`
+- تم استبدال `addslashes()` بـ `PDO::quote()` في `BackupService` لحماية SQL
+- تم إضافة `throttle:30,1` لمسار `/api/get-employee`
+- تم تقييد CORS لـ `mycorner.site` فقط بدلاً من `*`
+- تم تنظيف المسارات المكررة في `routes/web.php`
+- تم تحميل ملفات خط Tajawal (10 ملفات woff2)
 
 ---
 
@@ -2080,7 +2094,7 @@ METHOD  URI                     CONTROLLER@METHOD                  THROTTLE
 POST    /api/auth-pin           AuthController@authByPin            10/min
 POST    /api/auth-device        AuthController@authByDevice         20/min
 POST    /api/verify-device      AuthController@verifyDevice         30/min
-GET     /api/get-employee       AuthController@getEmployee          -
+GET     /api/get-employee       AuthController@getEmployee          30/min
 POST    /api/check-in           CheckInController                   30/min
 POST    /api/check-out          CheckOutController                  30/min
 POST    /api/overtime           OvertimeController@start            20/min
@@ -2280,7 +2294,7 @@ $app->bind('path.public', fn() => __DIR__);
 ## المعلومات الأساسية
 
 ```
-Base URL:       https://sarh.io/api
+Base URL:       https://mycorner.site/api
 Content-Type:   application/json
 Accept:         application/json
 Authentication: Token-based (employee) / Session-based (admin)
@@ -2400,6 +2414,8 @@ Authentication: Token-based (employee) / Session-based (admin)
 ---
 
 ### 1.4 `GET /api/get-employee` — جلب بيانات الموظف
+
+**Rate Limit:** 30 طلب/دقيقة
 
 **الطلب:**
 ```
@@ -2923,6 +2939,7 @@ GET /api/get-employee?token=a7b3c9d1e5f2...
 | `/api/auth-pin` | 10 طلبات | دقيقة |
 | `/api/auth-device` | 20 طلب | دقيقة |
 | `/api/verify-device` | 30 طلب | دقيقة |
+| `/api/get-employee` | 30 طلب | دقيقة |
 | `/api/check-in` | 30 طلب | دقيقة |
 | `/api/check-out` | 30 طلب | دقيقة |
 | `/api/overtime` | 20 طلب | دقيقة |
@@ -3128,8 +3145,7 @@ session([
 ✅ محمي: كل الاستعلامات عبر Laravel Eloquent ORM
 ✅ محمي: Parameterized queries (prepared statements)
 ✅ محمي: Input validation قبل أي query
-
-❌ لا يوجد استعلامات raw SQL غير محمية
+✅ محمي: BackupService يستخدم PDO::quote() لهروب القيم عند إنشاء النسخ الاحتياطية
 ```
 
 ### XSS (Cross-Site Scripting)
@@ -3147,11 +3163,22 @@ session([
 ✅ محمي: @csrf في كل النماذج
 ✅ محمي: Laravel VerifyCsrfToken middleware
 ✅ محمي: رموز عشوائية لكل جلسة
+✅ محمي: زر تسجيل الخروج يستخدم <form method="POST"> مع @csrf
 ```
 
 ---
 
-## 12. توصيات أمنية للمدير
+## 12. حماية CORS (Cross-Origin Resource Sharing)
+
+```
+✅ مقيّد: allowed_origins = ['https://mycorner.site', 'https://www.mycorner.site']
+✅ فقط الدومين الرسمي يمكنه إرسال طلبات cross-origin للـ API
+✅ يمنع المواقع الخارجية من استغلال جلسات المدير
+```
+
+---
+
+## 13. توصيات أمنية للمدير
 
 ### ✅ افعل
 
@@ -3185,7 +3212,7 @@ session([
 
 
 
-# 📚 توثيق نظام إدارة الحضور والانصراف — Sarh.io
+# 📚 توثيق نظام إدارة الحضور والانصراف — mycorner.site
 
 ## فهرس التوثيق
 
@@ -3200,8 +3227,35 @@ session([
 
 ---
 
-**الموقع:** https://sarh.io
-**التقنية:** Laravel 11 · PHP 8.3 · MariaDB · Blade
-**الإصدار:** 1.0.0
-**آخر تحديث:** مارس 2026
+## تحديثات الإنتاج (مارس 2026)
+
+### الربط والبنية التحتية
+- الدومين الرسمي الحالي: https://mycorner.site
+- تم تفعيل HTTPS بشهادة Let's Encrypt مع تحويل تلقائي من HTTP
+- تم تضمين `StartSession` و `EncryptCookies` في مجموعة `api` middleware
+
+### إصلاحات حرجة (v1.1.0)
+- **رسائل Flash:** تم تصحيح مفاتيح الجلسة في القالب (`flash_success` ← `success`، `flash_error` ← `error`)
+- **زر تسجيل الخروج:** تم تحويله من `<a href>` (GET) إلى `<form method="POST">`
+- **رموز استرداد 2FA:** تم إضافة `decrypt()` عند التحقق من الرموز المشفرة
+- **حذف بيانات اعتماد مكشوفة:** حذف 25+ ملف Python وملفات MD تحتوي كلمات مرور
+
+### إصلاحات أمنية
+- إصلاح شارة الإشعارات (`notifiable_type` مطابق لـ `Admin::class`)
+- إصلاح Mass Assignment في `BranchController` (استخدام `$request->validated()`)
+- استبدال `addslashes()` بـ `PDO::quote()` في `BackupService`
+- إضافة Rate Limiting لمسار `/api/get-employee` (30/دقيقة)
+- تقييد CORS لدومين `mycorner.site` فقط
+
+### إصلاحات الواجهة
+- رسالة انتهاء الجلسة تظهر في صفحة تسجيل الدخول
+- تنظيف المسارات المكررة في `routes/web.php`
+- تحميل ملفات خط Tajawal woff2 لإصلاح المظهر العربي
+
+---
+
+**الموقع:** https://mycorner.site
+**التقنية:** Laravel 10 · PHP 8.3 · MariaDB · Blade
+**الإصدار:** 1.1.0
+**آخر تحديث:** 20 مارس 2026
 

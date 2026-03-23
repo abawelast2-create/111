@@ -44,6 +44,9 @@
             <a href="{{ route('admin.employees.index') }}" class="nav-item {{ ($activePage ?? '') === 'employees' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="employees" :size="18"/></span> إدارة الموظفين
             </a>
+            <a href="{{ route('admin.documents-expiry') }}" class="nav-item {{ ($activePage ?? '') === 'documents-expiry' ? 'active' : '' }}">
+                <span class="nav-icon"><x-icon name="attendance" :size="18"/></span> انتهاء الوثائق
+            </a>
             <a href="{{ route('admin.attendance.index') }}" class="nav-item {{ ($activePage ?? '') === 'attendance' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="attendance" :size="18"/></span> تقارير الحضور
             </a>
@@ -68,7 +71,7 @@
             <div class="nav-label">النظام</div>
             <a href="{{ route('admin.notifications.index') }}" class="nav-item {{ ($activePage ?? '') === 'notifications' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="attendance" :size="18"/></span> الإشعارات
-                @php $unreadNotif = \App\Models\Notification::where('notifiable_type', 'admin')->whereNull('read_at')->count(); @endphp
+                @php $unreadNotif = \App\Models\Notification::where('notifiable_type', \App\Models\Admin::class)->whereNull('read_at')->count(); @endphp
                 @if($unreadNotif > 0)<span class="badge badge-orange" style="font-size:.65rem;padding:2px 6px;margin-right:auto">{{ $unreadNotif }}</span>@endif
             </a>
             <a href="{{ route('admin.backups.index') }}" class="nav-item {{ ($activePage ?? '') === 'backups' ? 'active' : '' }}">
@@ -85,9 +88,12 @@
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="{{ route('admin.logout') }}" class="logout-btn">
-                <span class="nav-icon"><x-icon name="logout" :size="18"/></span> تسجيل الخروج
-            </a>
+            <form method="POST" action="{{ route('admin.logout') }}" style="margin:0">
+                @csrf
+                <button type="submit" class="logout-btn" style="width:100%;border:none;cursor:pointer;background:inherit;color:inherit;font:inherit;text-align:start;display:flex;align-items:center;padding:inherit">
+                    <span class="nav-icon"><x-icon name="logout" :size="18"/></span> تسجيل الخروج
+                </button>
+            </form>
         </div>
     </aside>
 
@@ -114,10 +120,13 @@
                     <span class="icon-moon">🌙</span>
                     <span class="icon-sun">☀️</span>
                 </button>
-                <a href="{{ route('admin.logout') }}" class="topbar-logout-btn" title="تسجيل الخروج">
-                    <x-icon name="logout" :size="18"/>
-                    <span class="topbar-logout-text">خروج</span>
-                </a>
+                <form method="POST" action="{{ route('admin.logout') }}" style="margin:0;display:inline">
+                    @csrf
+                    <button type="submit" class="topbar-logout-btn" title="تسجيل الخروج" style="border:none;cursor:pointer;background:inherit;color:inherit;font:inherit">
+                        <x-icon name="logout" :size="18"/>
+                        <span class="topbar-logout-text">خروج</span>
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -149,11 +158,11 @@
         <div class="dropdown-overlay" id="dropdownOverlay"></div>
 
         <div class="content fade-in">
-            @if(session('flash_success'))
-                <div class="alert alert-success">{{ session('flash_success') }}</div>
+            @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
             @endif
-            @if(session('flash_error'))
-                <div class="alert alert-error">{{ session('flash_error') }}</div>
+            @if(session('error'))
+                <div class="alert alert-error">{{ session('error') }}</div>
             @endif
 
             @yield('content')
