@@ -11,8 +11,17 @@ fi
 
 composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
 
-php artisan key:generate --force || true
-php artisan migrate --force
+# Never rotate an existing APP_KEY. Generate only when missing.
+if ! grep -q '^APP_KEY=base64:' .env; then
+  php artisan key:generate --force || true
+fi
+
+# Keep deploy successful even when DB credentials are not ready yet.
+if php artisan migrate --force; then
+  echo "Database migrations completed."
+else
+  echo "WARNING: Database migrations failed. Verify DB_* settings in .env and MySQL user permissions."
+fi
 php artisan storage:link || true
 php artisan optimize:clear
 php artisan config:cache
