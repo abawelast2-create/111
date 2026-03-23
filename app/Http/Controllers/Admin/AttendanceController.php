@@ -13,16 +13,12 @@ class AttendanceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Attendance::with('employee.branch');
+        $from = $request->input('from', now()->toDateString());
+        $to = $request->input('to', now()->toDateString());
 
-        if ($request->filled('date_from')) {
-            $query->where('attendance_date', '>=', $request->date_from);
-        } else {
-            $query->where('attendance_date', '>=', today()->toDateString());
-        }
-        if ($request->filled('date_to')) {
-            $query->where('attendance_date', '<=', $request->date_to);
-        }
+        $query = Attendance::with('employee.branch')
+            ->whereBetween('attendance_date', [$from, $to]);
+
         if ($request->filled('employee_id')) {
             $query->where('employee_id', $request->employee_id);
         }
@@ -33,11 +29,20 @@ class AttendanceController extends Controller
             $query->where('type', $request->type);
         }
 
-        $records   = $query->latest('timestamp')->paginate(25);
+        $statsQuery = clone $query;
+
+        $stats = [
+            'in' => (clone $statsQuery)->where('type', 'in')->count(),
+            'out' => (clone $statsQuery)->where('type', 'out')->count(),
+            'overtime' => (clone $statsQuery)->whereIn('type', ['overtime-start', 'overtime-end'])->count(),
+            'late' => (clone $statsQuery)->where('late_minutes', '>', 0)->count(),
+        ];
+
+        $attendances = $query->latest('timestamp')->paginate(25);
         $employees = Employee::active()->orderBy('name')->get();
         $branches  = Branch::active()->get();
 
-        return view('admin.attendance', compact('records', 'employees', 'branches'));
+        return view('admin.attendance', compact('attendances', 'employees', 'branches', 'stats', 'from', 'to'));
     }
 
     public function destroy(Attendance $attendance)
