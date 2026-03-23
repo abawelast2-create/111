@@ -12,9 +12,21 @@ class AdminFactory extends Factory
     public function definition(): array
     {
         return [
-            'username' => $this->faker->unique()->userName(),
-            'password' => bcrypt('password'),
-            'name' => $this->faker->name(),
+            'username'      => $this->faker->unique()->userName(),
+            'password_hash' => bcrypt('password'),
+            'full_name'     => $this->faker->name(),
+            'email'         => $this->faker->unique()->safeEmail(),
+            'is_super_admin'=> false,
         ];
+    }
+
+    public function superAdmin(): static
+    {
+        return $this->state(['is_super_admin' => true]);
+    }
+
+    public function withPassword(string $password): static
+    {
+        return $this->state(['password_hash' => bcrypt($password)]);
     }
 }
