@@ -31,6 +31,11 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -p ${VPS_PORT} -H ${VPS_HOST} >> ~/.ssh/known_hosts
 
+      - name: Mark deploy scripts as executable
+        run: |
+          chmod +x scripts/vps/post-deploy.sh
+          chmod +x scripts/vps/bootstrap-ubuntu-24-laravel.sh
+
       - name: Ensure deploy directory exists on VPS
         run: |
           ssh -p ${VPS_PORT} ${VPS_USER}@${VPS_HOST} "mkdir -p ${DEPLOY_PATH}"
@@ -54,26 +59,6 @@ jobs:
           ssh -p ${VPS_PORT} ${VPS_USER}@${VPS_HOST} << 'EOF'
           set -e
           cd /var/www/attendance-laravel
-
-          if [ ! -f .env ]; then
-            cp .env.example .env
-          fi
-
-          if command -v composer >/dev/null 2>&1; then
-            composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
-          else
-            echo "Composer is not installed on VPS" >&2
-            exit 1
-          fi
-
-          php artisan key:generate --force || true
-          php artisan migrate --force
-          php artisan storage:link || true
-          php artisan optimize:clear
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-
-          chown -R www-data:www-data storage bootstrap/cache || true
-          chmod -R ug+rwx storage bootstrap/cache || true
+          chmod +x scripts/vps/post-deploy.sh
+          ./scripts/vps/post-deploy.sh /var/www/attendance-laravel
           EOF
