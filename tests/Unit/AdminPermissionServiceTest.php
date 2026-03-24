@@ -21,33 +21,37 @@ class AdminPermissionServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        \App\Models\Permission::query()->delete();
+        \App\Models\PermissionGroup::query()->delete();
 
         $this->superAdmin   = Admin::factory()->superAdmin()->create();
         $this->regularAdmin = Admin::factory()->create(['is_super_admin' => false]);
-
-        $this->groupA = PermissionGroup::create([
+        // Clear static cache to prevent test leakage
+        \App\Services\AdminPermissionService::clearAdminCache($this->superAdmin->id);
+        \App\Services\AdminPermissionService::clearAdminCache($this->regularAdmin->id);
+        $this->groupA = PermissionGroup::firstOrCreate([
             'group_key' => 'group_a',
             'name'      => 'Group A',
         ]);
 
-        $this->groupB = PermissionGroup::create([
+        $this->groupB = PermissionGroup::firstOrCreate([
             'group_key' => 'group_b',
             'name'      => 'Group B',
         ]);
 
-        Permission::create([
+        Permission::firstOrCreate([
             'permission_group_id' => $this->groupA->id,
             'permission_key'      => 'employees.view',
             'name'                => 'عرض الموظفين',
         ]);
 
-        Permission::create([
+        Permission::firstOrCreate([
             'permission_group_id' => $this->groupA->id,
             'permission_key'      => 'employees.create',
             'name'                => 'إضافة موظف',
         ]);
 
-        Permission::create([
+        Permission::firstOrCreate([
             'permission_group_id' => $this->groupB->id,
             'permission_key'      => 'branches.view',
             'name'                => 'عرض الفروع',
@@ -110,6 +114,7 @@ class AdminPermissionServiceTest extends TestCase
     public function test_permission_keys_empty_for_admin_with_no_groups(): void
     {
         $keys = AdminPermissionService::permissionKeysForAdmin($this->regularAdmin);
+        dump($keys);
         $this->assertEmpty($keys);
     }
 
@@ -164,7 +169,7 @@ class AdminPermissionServiceTest extends TestCase
     public function test_missing_deps_detected(): void
     {
         // أضف permission تعتمد على شيء آخر غير موجود في المجموعة
-        Permission::create([
+        Permission::firstOrCreate([
             'permission_group_id' => $this->groupA->id,
             'permission_key'      => 'employees.delete',
             'name'                => 'حذف موظف',
@@ -195,3 +200,5 @@ class AdminPermissionServiceTest extends TestCase
         $this->assertEquals($this->regularAdmin->id, $admin->id);
     }
 }
+
+

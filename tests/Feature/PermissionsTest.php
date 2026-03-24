@@ -22,23 +22,25 @@ class PermissionsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        \App\Models\Permission::query()->delete();
+        \App\Models\PermissionGroup::query()->delete();
 
         $this->superAdmin    = Admin::factory()->superAdmin()->create();
         $this->regularAdmin  = Admin::factory()->create(['is_super_admin' => false]);
 
-        $this->group = PermissionGroup::create([
+        $this->group = PermissionGroup::firstOrCreate([
             'group_key'   => 'employees_group',
             'name'        => 'إدارة الموظفين',
             'description' => 'اختبار',
         ]);
 
-        Permission::create([
+        Permission::firstOrCreate([
             'permission_group_id' => $this->group->id,
             'permission_key'      => 'employees.view',
             'name'                => 'عرض الموظفين',
         ]);
 
-        Permission::create([
+        Permission::firstOrCreate([
             'permission_group_id' => $this->group->id,
             'permission_key'      => 'employees.create',
             'name'                => 'إضافة موظف',
@@ -184,3 +186,5 @@ class PermissionsTest extends TestCase
         $this->assertNotContains('employees.view', $keys);
     }
 }
+
+

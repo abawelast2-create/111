@@ -42,6 +42,8 @@ class AttendanceAdminTest extends TestCase
             'timestamp'       => now(),
             'attendance_date' => today()->toDateString(),
             'late_minutes'    => 0,
+            'latitude'        => 24.7136,
+            'longitude'       => 46.6753,
         ], $overrides));
     }
 
@@ -50,7 +52,7 @@ class AttendanceAdminTest extends TestCase
     public function test_attendance_page_is_accessible(): void
     {
         $this->asAdmin()
-             ->get(route('admin.attendance'))
+             ->get(route('admin.attendance.index'))
              ->assertStatus(200);
     }
 
@@ -60,7 +62,7 @@ class AttendanceAdminTest extends TestCase
         $this->makeAttendance('out');
 
         $this->asAdmin()
-             ->get(route('admin.attendance'))
+             ->get(route('admin.attendance.index'))
              ->assertStatus(200)
              ->assertViewHas('attendances');
     }
@@ -71,7 +73,7 @@ class AttendanceAdminTest extends TestCase
         $this->makeAttendance('in', ['attendance_date' => today()->subDays(3)->toDateString()]);
 
         $response = $this->asAdmin()
-                         ->get(route('admin.attendance', ['date' => today()->toDateString()]));
+                         ->get(route('admin.attendance.index', ['date' => today()->toDateString()]));
 
         $response->assertStatus(200)
                  ->assertViewHas('attendances');
@@ -83,7 +85,7 @@ class AttendanceAdminTest extends TestCase
         $this->makeAttendance('out');
 
         $response = $this->asAdmin()
-                         ->get(route('admin.attendance', ['type' => 'in']));
+                         ->get(route('admin.attendance.index', ['type' => 'in']));
 
         $response->assertStatus(200)
                  ->assertViewHas('attendances', fn ($p) => $p->every(fn ($r) => $r->type === 'in'));
@@ -107,7 +109,7 @@ class AttendanceAdminTest extends TestCase
     public function test_late_report_page_is_accessible(): void
     {
         $this->asAdmin()
-             ->get(route('admin.attendance.lateReport'))
+             ->get(route('admin.late-report'))
              ->assertStatus(200);
     }
 
@@ -117,7 +119,7 @@ class AttendanceAdminTest extends TestCase
         $this->makeAttendance('in', ['late_minutes' => 30]);
 
         $this->asAdmin()
-             ->get(route('admin.attendance.lateReport'))
+             ->get(route('admin.late-report'))
              ->assertStatus(200);
     }
 
@@ -137,6 +139,6 @@ class AttendanceAdminTest extends TestCase
 
     public function test_unauthenticated_cannot_access_attendance_admin(): void
     {
-        $this->get(route('admin.attendance'))->assertRedirect(route('admin.login'));
+        $this->get(route('admin.attendance.index'))->assertRedirect(route('admin.login'));
     }
 }

@@ -17,7 +17,7 @@ class BranchController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name'                 => 'required|string|max:255|unique:branches',
             'latitude'             => 'required|numeric',
             'longitude'            => 'required|numeric',
@@ -30,7 +30,7 @@ class BranchController extends Controller
             'check_out_end_time'   => 'required',
         ]);
 
-        $branch = Branch::create($request->validated());
+        $branch = Branch::create($validated);
         AuditLog::record('add_branch', "إضافة فرع: {$branch->name}", $branch->id);
 
         return redirect()->route('admin.branches.index')->with('success', 'تمت إضافة الفرع بنجاح');
@@ -38,7 +38,7 @@ class BranchController extends Controller
 
     public function update(Request $request, Branch $branch)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name'                 => 'required|string|max:255|unique:branches,name,' . $branch->id,
             'latitude'             => 'required|numeric',
             'longitude'            => 'required|numeric',
@@ -51,7 +51,7 @@ class BranchController extends Controller
             'check_out_end_time'   => 'required',
         ]);
 
-        $branch->update($request->validated());
+        $branch->update($validated);
         AuditLog::record('edit_branch', "تعديل فرع: {$branch->name}", $branch->id);
 
         return redirect()->route('admin.branches.index')->with('success', 'تم تحديث بيانات الفرع');
@@ -65,3 +65,4 @@ class BranchController extends Controller
         return redirect()->route('admin.branches.index')->with('success', 'تم تعطيل الفرع');
     }
 }
+

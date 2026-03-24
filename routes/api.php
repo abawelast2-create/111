@@ -25,16 +25,16 @@ Route::get('serve-file', [Api\ProfileController::class, 'serveFile']);
 
 // =================== مسارات تحتاج صلاحية المدير ===================
 Route::middleware('admin.auth')->group(function () {
-    Route::get('realtime-dashboard', [Api\RealtimeController::class, 'dashboard']);
-    Route::get('realtime-attendance', [Api\RealtimeController::class, 'attendance']);
-    Route::get('export', [Api\RealtimeController::class, 'export']);
-    Route::post('send-all-links', [Api\WhatsAppController::class, 'sendAll']);
-    Route::post('regenerate-tokens', [Api\WhatsAppController::class, 'regenerateTokens']);
-    Route::post('whatsapp', [Api\WhatsAppController::class, 'generateLink']);
-    Route::post('profile-action', [Api\ProfileController::class, 'profileAction']);
-    Route::post('upload-profile', [Api\ProfileController::class, 'uploadProfile']);
-    Route::get('get-group-files', [Api\ProfileController::class, 'getGroupFiles']);
-    Route::post('preferences', [Api\ProfileController::class, 'savePreferences']);
+    Route::get('realtime-dashboard', [Api\RealtimeController::class, 'dashboard'])->middleware('admin.permission:dashboard.view');
+    Route::get('realtime-attendance', [Api\RealtimeController::class, 'attendance'])->middleware('admin.permission:attendance.view');
+    Route::get('export', [Api\RealtimeController::class, 'export'])->middleware('admin.permission:attendance.view');
+    Route::post('send-all-links', [Api\WhatsAppController::class, 'sendAll'])->middleware('admin.permission:employees.view');
+    Route::post('regenerate-tokens', [Api\WhatsAppController::class, 'regenerateTokens'])->middleware('admin.permission:employees.update');
+    Route::post('whatsapp', [Api\WhatsAppController::class, 'generateLink'])->middleware('admin.permission:employees.view');
+    Route::post('profile-action', [Api\ProfileController::class, 'profileAction'])->middleware('admin.permission:employees.profile');
+    Route::post('upload-profile', [Api\ProfileController::class, 'uploadProfile'])->middleware('admin.permission:employees.profile');
+    Route::get('get-group-files', [Api\ProfileController::class, 'getGroupFiles'])->middleware('admin.permission:employees.profile');
+    Route::post('preferences', [Api\ProfileController::class, 'savePreferences'])->middleware('admin.permission:settings.update');
 });
 
 // =================== API عام (Sanctum) ===================
@@ -61,8 +61,10 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // =================== التقويم ===================
-Route::get('calendar/leaves', [Api\CalendarController::class, 'exportLeaves'])->middleware('admin.auth');
-Route::get('calendar/schedule', [Api\CalendarController::class, 'exportSchedule'])->middleware('admin.auth');
+Route::get('calendar/leaves', [Api\CalendarController::class, 'exportLeaves'])
+    ->middleware(['admin.auth', 'admin.permission:leaves.view']);
+Route::get('calendar/schedule', [Api\CalendarController::class, 'exportSchedule'])
+    ->middleware(['admin.auth', 'admin.permission:attendance.view']);
 
 // =================== الإشعارات ===================
 Route::middleware('admin.auth')->group(function () {
@@ -70,7 +72,7 @@ Route::middleware('admin.auth')->group(function () {
         return response()->json(\App\Services\NotificationService::getRecent(
             \App\Models\Admin::class, session('admin_id'), 20
         ));
-    });
+    })->middleware('admin.permission:notifications.view');
 });
 
 // =================== النظام ===================

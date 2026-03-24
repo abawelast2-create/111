@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace Tests\Unit;
 
@@ -11,7 +11,7 @@ class GeofenceServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    // ─── حساب المسافة ────────────────────────────────────────────────────────
+    // â”€â”€â”€ Ø­Ø³Ø§Ø¨ Ø§Ù„Ù…Ø³Ø§ÙØ© â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function test_same_point_returns_zero_distance(): void
     {
@@ -21,7 +21,7 @@ class GeofenceServiceTest extends TestCase
 
     public function test_distance_between_known_points(): void
     {
-        // الرياض → جدة: ~860 كم
+        // Ø§Ù„Ø±ÙŠØ§Ø¶ â†’ Ø¬Ø¯Ø©: ~860 ÙƒÙ…
         $distance = GeofenceService::calculateDistance(24.7136, 46.6753, 21.4858, 39.1925);
         $this->assertGreaterThan(800000, $distance);
         $this->assertLessThan(920000, $distance);
@@ -37,7 +37,7 @@ class GeofenceServiceTest extends TestCase
 
     public function test_distance_within_same_city_is_reasonable(): void
     {
-        // نقطتان في الرياض (~2 كم)
+        // Ù†Ù‚Ø·ØªØ§Ù† ÙÙŠ Ø§Ù„Ø±ÙŠØ§Ø¶ (~2 ÙƒÙ…)
         $distance = GeofenceService::calculateDistance(24.7136, 46.6753, 24.7300, 46.6900);
         $this->assertGreaterThan(1000, $distance);
         $this->assertLessThan(5000, $distance);
@@ -49,7 +49,7 @@ class GeofenceServiceTest extends TestCase
         $this->assertGreaterThan(0, $d);
     }
 
-    // ─── التحقق من الجيوفينس ─────────────────────────────────────────────────
+    // â”€â”€â”€ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø§Ù„Ø¬ÙŠÙˆÙÙŠÙ†Ø³ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function test_within_geofence_returns_allowed_true(): void
     {
@@ -73,7 +73,7 @@ class GeofenceServiceTest extends TestCase
             'geofence_radius' => 100,
         ]);
 
-        // نقطة بعيدة ~2 كم
+        // Ù†Ù‚Ø·Ø© Ø¨Ø¹ÙŠØ¯Ø© ~2 ÙƒÙ…
         $result = GeofenceService::isWithinGeofence(24.7300, 46.6900, $branch->id);
 
         $this->assertFalse($result['allowed']);
@@ -94,7 +94,7 @@ class GeofenceServiceTest extends TestCase
 
     public function test_null_branch_id_falls_back_to_settings(): void
     {
-        // بدون branch_id وبدون settings، يُسمح دائماً
+        // Ø¨Ø¯ÙˆÙ† branch_id ÙˆØ¨Ø¯ÙˆÙ† settingsØŒ ÙŠÙØ³Ù…Ø­ Ø¯Ø§Ø¦Ù…Ø§Ù‹
         $result = GeofenceService::isWithinGeofence(24.7136, 46.6753, null);
 
         $this->assertTrue($result['allowed']);
@@ -108,9 +108,9 @@ class GeofenceServiceTest extends TestCase
             'geofence_radius' => 500,
         ]);
 
-        // نقطة قريبة جداً (~100م)
+        // Ù†Ù‚Ø·Ø© Ù‚Ø±ÙŠØ¨Ø© Ø¬Ø¯Ø§Ù‹ (~100Ù…)
         $result = GeofenceService::isWithinGeofence(24.7136, 46.6800, $branch->id);
-        // ~400 متر → داخل النطاق
+        // ~400 متر â†’ Ø¯Ø§Ø®Ù„ Ø§Ù„Ù†Ø·Ø§Ù‚
         $this->assertTrue($result['allowed']);
     }
 
@@ -123,7 +123,7 @@ class GeofenceServiceTest extends TestCase
             'is_active'       => false,
         ]);
 
-        // الفرع غير نشط → يرجع إلى Settings (التي تكون 0,0 في الاختبارات) → مسموح
+        // Ø§Ù„ÙØ±Ø¹ ØºÙŠØ± Ù†Ø´Ø· â†’ ÙŠØ±Ø¬Ø¹ Ø¥Ù„Ù‰ Settings (Ø§Ù„ØªÙŠ ØªÙƒÙˆÙ† 0,0 ÙÙŠ Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±Ø§Øª) â†’ Ù…Ø³Ù…ÙˆØ­
         $result = GeofenceService::isWithinGeofence(25.0000, 47.0000, $branch->id);
 
         $this->assertTrue($result['allowed']);
@@ -142,3 +142,4 @@ class GeofenceServiceTest extends TestCase
         $this->assertStringContainsString('متر', $result['message']);
     }
 }
+

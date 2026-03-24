@@ -91,7 +91,7 @@ class AttendanceServiceTest extends TestCase
 
     public function test_duplicate_record_within_5_minutes_blocked(): void
     {
-        Attendance::create([
+        Attendance::create(['latitude' => 24.7136, 'longitude' => 46.6753,
             'employee_id'     => $this->employee->id,
             'type'            => 'in',
             'timestamp'       => now()->subMinutes(3),
@@ -107,7 +107,7 @@ class AttendanceServiceTest extends TestCase
 
     public function test_record_after_5_minutes_allowed(): void
     {
-        Attendance::create([
+        Attendance::create(['latitude' => 24.7136, 'longitude' => 46.6753,
             'employee_id'     => $this->employee->id,
             'type'            => 'in',
             'timestamp'       => now()->subMinutes(6),
@@ -180,7 +180,7 @@ class AttendanceServiceTest extends TestCase
 
     public function test_has_recent_record_returns_true_within_window(): void
     {
-        Attendance::create([
+        Attendance::create(['latitude' => 24.7136, 'longitude' => 46.6753,
             'employee_id'     => $this->employee->id,
             'type'            => 'in',
             'timestamp'       => now()->subMinutes(2),
@@ -192,7 +192,7 @@ class AttendanceServiceTest extends TestCase
 
     public function test_has_recent_record_returns_false_outside_window(): void
     {
-        Attendance::create([
+        Attendance::create(['latitude' => 24.7136, 'longitude' => 46.6753,
             'employee_id'     => $this->employee->id,
             'type'            => 'in',
             'timestamp'       => now()->subMinutes(10),
@@ -215,13 +215,13 @@ class AttendanceServiceTest extends TestCase
 
     public function test_today_stats_counts_correct_check_ins(): void
     {
-        Attendance::create([
+        Attendance::create(['latitude' => 24.7136, 'longitude' => 46.6753,
             'employee_id'     => $this->employee->id,
             'type'            => 'in',
             'timestamp'       => now(),
             'attendance_date' => today()->toDateString(),
         ]);
-
+        
         $stats = Attendance::getTodayStats();
         $this->assertEquals(1, $stats['checked_in']);
     }

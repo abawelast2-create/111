@@ -146,7 +146,7 @@ class AttendanceApiTest extends TestCase
 
     public function test_duplicate_check_in_within_5_minutes_blocked(): void
     {
-        Attendance::create([
+        Attendance::create(['latitude' => 24.7136, 'longitude' => 46.6753,
             'employee_id'     => $this->employee->id,
             'type'            => 'in',
             'timestamp'       => now()->subMinutes(2),

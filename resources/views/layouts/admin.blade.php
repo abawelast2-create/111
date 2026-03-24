@@ -35,57 +35,94 @@
         </div>
         <nav class="sidebar-nav">
             <div class="nav-label">القائمة الرئيسية</div>
+            @adminCan('dashboard.view')
             <a href="{{ route('admin.dashboard') }}" class="nav-item {{ ($activePage ?? '') === 'dashboard' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="dashboard" :size="18"/></span> لوحة التحكم
             </a>
+            @endadminCan
+            @adminCan('branches.view')
             <a href="{{ route('admin.branches.index') }}" class="nav-item {{ ($activePage ?? '') === 'branches' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="branch" :size="18"/></span> إدارة الفروع
             </a>
+            @endadminCan
+            @adminCan('employees.view')
             <a href="{{ route('admin.employees.index') }}" class="nav-item {{ ($activePage ?? '') === 'employees' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="employees" :size="18"/></span> إدارة الموظفين
             </a>
+            @endadminCan
+            @adminCan('employees.documents_expiry')
             <a href="{{ route('admin.documents-expiry') }}" class="nav-item {{ ($activePage ?? '') === 'documents-expiry' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="attendance" :size="18"/></span> انتهاء الوثائق
             </a>
+            @endadminCan
+            @adminCan('attendance.view')
             <a href="{{ route('admin.attendance.index') }}" class="nav-item {{ ($activePage ?? '') === 'attendance' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="attendance" :size="18"/></span> تقارير الحضور
             </a>
+            @endadminCan
+            @adminCan('attendance.late_report')
             <a href="{{ route('admin.late-report') }}" class="nav-item {{ ($activePage ?? '') === 'late-report' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="attendance" :size="18"/></span> تقرير التأخير
             </a>
+            @endadminCan
+            @adminCan('attendance.charts')
             <a href="{{ route('admin.report-charts') }}" class="nav-item {{ ($activePage ?? '') === 'report-charts' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="chart" :size="18"/></span> التقارير البيانية
             </a>
+            @endadminCan
+            @adminCan('leaves.view')
             <a href="{{ route('admin.leaves.index') }}" class="nav-item {{ ($activePage ?? '') === 'leaves' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="absent" :size="18"/></span> إدارة الإجازات
             </a>
+            @endadminCan
+            @adminCan('tampering.view')
             <a href="{{ route('admin.tampering') }}" class="nav-item {{ ($activePage ?? '') === 'tampering' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="lock" :size="18"/></span> حالات التلاعب
             </a>
+            @endadminCan
+            @adminCan('secret_reports.view')
             <a href="{{ route('admin.secret-reports') }}" class="nav-item {{ ($activePage ?? '') === 'secret-reports' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="absent" :size="18"/></span> التقارير السرية
             </a>
+            @endadminCan
+            @adminCan('analytics.view')
             <a href="{{ route('admin.analytics.index') }}" class="nav-item {{ ($activePage ?? '') === 'analytics' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="chart" :size="18"/></span> التحليلات المتقدمة
             </a>
+            @endadminCan
             <div class="nav-label">النظام</div>
+            @adminCan('notifications.view')
             <a href="{{ route('admin.notifications.index') }}" class="nav-item {{ ($activePage ?? '') === 'notifications' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="attendance" :size="18"/></span> الإشعارات
                 @php $unreadNotif = \App\Models\Notification::where('notifiable_type', \App\Models\Admin::class)->whereNull('read_at')->count(); @endphp
                 @if($unreadNotif > 0)<span class="badge badge-orange" style="font-size:.65rem;padding:2px 6px;margin-right:auto">{{ $unreadNotif }}</span>@endif
             </a>
+            @endadminCan
+            @adminCan('backups.view')
             <a href="{{ route('admin.backups.index') }}" class="nav-item {{ ($activePage ?? '') === 'backups' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="settings" :size="18"/></span> النسخ الاحتياطي
             </a>
+            @endadminCan
+            @adminCan('webhooks.view')
             <a href="{{ route('admin.webhooks.index') }}" class="nav-item {{ ($activePage ?? '') === 'webhooks' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="lock" :size="18"/></span> Webhooks
             </a>
+            @endadminCan
+            @adminCan('twofactor.manage')
             <a href="{{ route('admin.2fa.index') }}" class="nav-item {{ ($activePage ?? '') === '2fa' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="lock" :size="18"/></span> المصادقة الثنائية
             </a>
+            @endadminCan
+            @adminCan('settings.view')
             <a href="{{ route('admin.settings.index') }}" class="nav-item {{ ($activePage ?? '') === 'settings' ? 'active' : '' }}">
                 <span class="nav-icon"><x-icon name="settings" :size="18"/></span> إعدادات النظام
             </a>
+            @endadminCan
+            @adminCan('permissions.manage')
+            <a href="{{ route('admin.permissions.index') }}" class="nav-item {{ ($activePage ?? '') === 'permissions' ? 'active' : '' }}">
+                <span class="nav-icon"><x-icon name="settings" :size="18"/></span> الصلاحيات
+            </a>
+            @endadminCan
         </nav>
         <div class="sidebar-footer">
             <form method="POST" action="{{ route('admin.logout') }}" style="margin:0">
@@ -132,26 +169,36 @@
 
         <!-- Bottom Navigation (mobile) -->
         <nav class="bottom-nav" id="bottomNav">
+            @adminCan('dashboard.view')
             <a href="{{ route('admin.dashboard') }}" class="bnav-item {{ ($activePage ?? '') === 'dashboard' ? 'active' : '' }}">
                 <x-icon name="dashboard" :size="22"/>
                 <span>الرئيسية</span>
             </a>
+            @endadminCan
+            @adminCan('branches.view')
             <a href="{{ route('admin.branches.index') }}" class="bnav-item {{ ($activePage ?? '') === 'branches' ? 'active' : '' }}">
                 <x-icon name="branch" :size="22"/>
                 <span>الفروع</span>
             </a>
+            @endadminCan
+            @adminCan('employees.view')
             <a href="{{ route('admin.employees.index') }}" class="bnav-item {{ ($activePage ?? '') === 'employees' ? 'active' : '' }}">
                 <x-icon name="employees" :size="22"/>
                 <span>الموظفين</span>
             </a>
+            @endadminCan
+            @adminCan('attendance.view')
             <a href="{{ route('admin.attendance.index') }}" class="bnav-item {{ ($activePage ?? '') === 'attendance' ? 'active' : '' }}">
                 <x-icon name="attendance" :size="22"/>
                 <span>الحضور</span>
             </a>
+            @endadminCan
+            @adminCan('settings.view')
             <a href="{{ route('admin.settings.index') }}" class="bnav-item {{ ($activePage ?? '') === 'settings' ? 'active' : '' }}">
                 <x-icon name="settings" :size="22"/>
                 <span>الإعدادات</span>
             </a>
+            @endadminCan
         </nav>
 
         <!-- Dropdown Overlay (mobile bottom-sheet) -->

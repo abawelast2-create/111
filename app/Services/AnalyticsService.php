@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Services;
 
@@ -89,11 +89,20 @@ class AnalyticsService
         }
 
         // استخراج اليوم والساعة
-        $data = $query->select(
-            DB::raw('DAYOFWEEK(attendance_date) as day_of_week'),
-            DB::raw('HOUR(timestamp) as hour'),
-            DB::raw('COUNT(*) as count')
-        )
+        if (DB::getDriverName() === 'sqlite') {
+            $data = $query->select(
+                DB::raw("CAST(strftime('%w', attendance_date) AS INTEGER) + 1 as day_of_week"),
+                DB::raw("CAST(strftime('%H', timestamp) AS INTEGER) as hour"),
+                DB::raw('COUNT(*) as count')
+            );
+        } else {
+            $data = $query->select(
+                DB::raw('DAYOFWEEK(attendance_date) as day_of_week'),
+                DB::raw('HOUR(timestamp) as hour'),
+                DB::raw('COUNT(*) as count')
+            );
+        }
+        $data = $data
             ->groupBy('day_of_week', 'hour')
             ->get();
 
@@ -223,3 +232,4 @@ class AnalyticsService
         ];
     }
 }
+

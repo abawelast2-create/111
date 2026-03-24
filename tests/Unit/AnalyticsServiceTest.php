@@ -30,9 +30,9 @@ class AnalyticsServiceTest extends TestCase
         $result = $this->service->getOverviewStats($from, $to);
 
         $this->assertArrayHasKey('total_employees', $result);
-        $this->assertArrayHasKey('attendance_rate', $result);
+        $this->assertArrayHasKey('total_checkins', $result);
         $this->assertArrayHasKey('avg_late_minutes', $result);
-        $this->assertArrayHasKey('avg_work_hours', $result);
+        $this->assertArrayHasKey('total_leaves', $result);
     }
 
     public function test_daily_trends_returns_array()
@@ -70,9 +70,9 @@ class AnalyticsServiceTest extends TestCase
 
         $result = $this->service->getFinancialReport($from, $to);
 
-        $this->assertArrayHasKey('total_overtime_hours', $result);
-        $this->assertArrayHasKey('overtime_cost', $result);
-        $this->assertArrayHasKey('total_late_minutes', $result);
-        $this->assertArrayHasKey('late_deductions', $result);
+        $this->assertArrayHasKey('overtime', $result);
+        $this->assertArrayHasKey('deductions', $result);
+        $this->assertArrayHasKey('total_overtime_cost', $result);
+        $this->assertArrayHasKey('total_deductions', $result);
     }
 }

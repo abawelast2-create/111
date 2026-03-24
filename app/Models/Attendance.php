@@ -44,8 +44,8 @@ class Attendance extends Model
     {
         $today = now()->toDateString();
         return [
-            'checked_in'      => static::where('attendance_date', $today)->where('type', 'in')->distinct('employee_id')->count('employee_id'),
-            'checked_out'     => static::where('attendance_date', $today)->where('type', 'out')->distinct('employee_id')->count('employee_id'),
+            'checked_in'      => static::whereDate('attendance_date', $today)->where('type', 'in')->distinct('employee_id')->count('employee_id'),
+            'checked_out'     => static::whereDate('attendance_date', $today)->where('type', 'out')->distinct('employee_id')->count('employee_id'),
             'total_employees' => Employee::where('is_active', true)->whereNull('deleted_at')->count(),
         ];
     }
@@ -55,3 +55,4 @@ class Attendance extends Model
         return $query->where('attendance_date', $date);
     }
 }
+

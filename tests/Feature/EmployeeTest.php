@@ -193,7 +193,7 @@ class EmployeeTest extends TestCase
         $oldPin   = $employee->pin;
 
         $response = $this->asAdmin()
-                         ->post(route('admin.employees.regeneratePin', $employee));
+                         ->post(route('admin.employees.regenerate-pin', $employee));
 
         $response->assertStatus(200)
                  ->assertJson(['success' => true])
@@ -213,7 +213,7 @@ class EmployeeTest extends TestCase
         ]);
 
         $this->asAdmin()
-             ->post(route('admin.employees.resetDevice', $employee))
+             ->post(route('admin.employees.reset-device', $employee))
              ->assertStatus(200)
              ->assertJson(['success' => true]);
 
