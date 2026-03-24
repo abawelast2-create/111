@@ -57,9 +57,13 @@ class AdminPermissionService
         return $keys;
     }
 
-    public static function clearAdminCache(int $adminId): void
+    public static function clearAdminCache(?int $adminId = null): void
     {
-        unset(self::$permissionCache[$adminId]);
+        if ($adminId !== null) {
+            unset(self::$permissionCache[$adminId]);
+        } else {
+            self::$permissionCache = [];
+        }
     }
 
     public static function validateDependenciesForGroups(array $groupIds): array

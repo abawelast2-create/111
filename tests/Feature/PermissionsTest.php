@@ -22,6 +22,7 @@ class PermissionsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        AdminPermissionService::clearAdminCache();
         \App\Models\Permission::query()->delete();
         \App\Models\PermissionGroup::query()->delete();
 
@@ -139,7 +140,7 @@ class PermissionsTest extends TestCase
                  'permission_group_ids' => [$this->group->id],
              ])->assertRedirect();
 
-        $this->assertTrue($this->regularAdmin->permissionGroups()->where('id', $this->group->id)->exists());
+        $this->assertTrue($this->regularAdmin->permissionGroups()->where('permission_groups.id', $this->group->id)->exists());
     }
 
     public function test_cannot_remove_super_admin_from_last_super_admin(): void

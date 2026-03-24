@@ -4,14 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Attendance extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'employee_id', 'type', 'timestamp', 'attendance_date',
         'late_minutes', 'latitude', 'longitude', 'location_accuracy',
         'mock_location_detected', 'validation_score', 'wifi_networks', 'ip_location_match',
         'ip_address', 'user_agent', 'notes',
+    ];
+
+    protected $attributes = [
+        'latitude'  => 0,
+        'longitude' => 0,
     ];
 
     protected $casts = [

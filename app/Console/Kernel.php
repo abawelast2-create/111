@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('attendance:auto-checkout')->everyMinute();
         $schedule->command('notifications:send-reminders')->everyMinute();
         $schedule->command('backup:database')->dailyAt('02:00');
+        $schedule->command('reports:send-scheduled')->everyMinute();
     }
 
     /**

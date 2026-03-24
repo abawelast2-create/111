@@ -33,7 +33,7 @@ return new class extends Migration
             $table->boolean('database_enabled')->default(true);
             $table->boolean('whatsapp_enabled')->default(false);
             $table->timestamps();
-            $table->unique(['user_type', 'user_id', 'notification_type']);
+            $table->unique(['user_type', 'user_id', 'notification_type'], 'notif_pref_user_type_unique');
         });
     }
 

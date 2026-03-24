@@ -5,7 +5,7 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Employee;
 
 // =================== الصفحة الرئيسية ===================
-Route::get('/', fn () => redirect('/employee'));
+Route::get('/', fn () => view('welcome'));
 
 // =================== مسارات المدير ===================
 Route::prefix('admin')->group(function () {
@@ -76,6 +76,9 @@ Route::prefix('admin')->group(function () {
         Route::get('late-report', [Admin\AttendanceController::class, 'lateReport'])
             ->middleware('admin.permission:attendance.late_report')
             ->name('admin.late-report');
+        Route::get('attendance/today-stats', [Admin\AttendanceController::class, 'todayStats'])
+            ->middleware('admin.permission:attendance.view')
+            ->name('admin.attendance.todayStats');
 
         // الإجازات
         Route::get('leaves', [Admin\LeaveController::class, 'index'])
@@ -190,6 +193,40 @@ Route::prefix('admin')->group(function () {
         Route::post('permissions/{admin}/assign', [Admin\PermissionController::class, 'assignGroups'])
             ->middleware('admin.permission:permissions.manage')
             ->name('admin.permissions.assign');
+
+        // تقارير البريد الإلكتروني
+        Route::get('report-schedules', [Admin\ReportMailController::class, 'index'])
+            ->middleware('admin.permission:settings.view')
+            ->name('admin.report-schedules.index');
+        Route::post('report-schedules', [Admin\ReportMailController::class, 'store'])
+            ->middleware('admin.permission:settings.update')
+            ->name('admin.report-schedules.store');
+        Route::put('report-schedules/{schedule}', [Admin\ReportMailController::class, 'update'])
+            ->middleware('admin.permission:settings.update')
+            ->name('admin.report-schedules.update');
+        Route::delete('report-schedules/{schedule}', [Admin\ReportMailController::class, 'destroy'])
+            ->middleware('admin.permission:settings.update')
+            ->name('admin.report-schedules.destroy');
+        Route::post('report-schedules/{schedule}/toggle', [Admin\ReportMailController::class, 'toggle'])
+            ->middleware('admin.permission:settings.update')
+            ->name('admin.report-schedules.toggle');
+        Route::post('report-schedules/send-now', [Admin\ReportMailController::class, 'sendNow'])
+            ->middleware('admin.permission:settings.update')
+            ->name('admin.report-schedules.send-now');
+
+        // مولّد البيانات
+        Route::get('data-generator', [Admin\DataGeneratorController::class, 'index'])
+            ->middleware('admin.permission:settings.view')
+            ->name('admin.data-generator.index');
+        Route::get('data-generator/preview', [Admin\DataGeneratorController::class, 'preview'])
+            ->middleware('admin.permission:settings.view')
+            ->name('admin.data-generator.preview');
+        Route::post('data-generator/generate', [Admin\DataGeneratorController::class, 'generate'])
+            ->middleware('admin.permission:settings.update')
+            ->name('admin.data-generator.generate');
+        Route::post('data-generator/cleanup', [Admin\DataGeneratorController::class, 'cleanup'])
+            ->middleware('admin.permission:settings.update')
+            ->name('admin.data-generator.cleanup');
     });
 });
 

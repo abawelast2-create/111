@@ -123,6 +123,16 @@
                 <span class="nav-icon"><x-icon name="settings" :size="18"/></span> الصلاحيات
             </a>
             @endadminCan
+            @adminCan('settings.view')
+            <a href="{{ route('admin.report-schedules.index') }}" class="nav-item {{ ($activePage ?? '') === 'report-schedules' ? 'active' : '' }}">
+                <span class="nav-icon"><x-icon name="attendance" :size="18"/></span> تقارير البريد
+            </a>
+            @endadminCan
+            @adminCan('settings.view')
+            <a href="{{ route('admin.data-generator.index') }}" class="nav-item {{ ($activePage ?? '') === 'data-generator' ? 'active' : '' }}">
+                <span class="nav-icon"><x-icon name="chart" :size="18"/></span> مولّد البيانات
+            </a>
+            @endadminCan
         </nav>
         <div class="sidebar-footer">
             <form method="POST" action="{{ route('admin.logout') }}" style="margin:0">

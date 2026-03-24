@@ -50,7 +50,7 @@ class AttendanceController extends Controller
         AuditLog::record('delete_attendance', "حذف سجل حضور للموظف ID: {$attendance->employee_id}", $attendance->id);
         $attendance->delete();
 
-        return response()->json(['success' => true, 'message' => 'تم حذف السجل']);
+        return redirect()->back()->with('success', 'تم حذف السجل');
     }
 
     public function lateReport(Request $request)
@@ -91,5 +91,10 @@ class AttendanceController extends Controller
         $details = $query->latest('timestamp')->paginate(25);
 
         return view('admin.late-report', compact('from', 'to', 'branches', 'summary', 'details'));
+    }
+
+    public function todayStats()
+    {
+        return response()->json(Attendance::getTodayStats());
     }
 }

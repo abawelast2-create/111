@@ -131,7 +131,27 @@ class PublicApiController extends Controller
             ->withCount(['employees' => fn ($q) => $q->active()])
             ->get();
 
-        return response()->json($branches);
+        return response()->json(['data' => $branches]);
+    }
+
+    /**
+     * إنشاء موظف جديد
+     */
+    public function employeeStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'      => 'required|string|max:255',
+            'branch_id' => 'required|integer|exists:branches,id',
+            'job_title' => 'required|string|max:255',
+            'phone'     => 'nullable|string|max:20',
+        ]);
+
+        $validated['pin'] = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $validated['unique_token'] = bin2hex(random_bytes(16));
+
+        $employee = Employee::create($validated);
+
+        return response()->json($employee, 201);
     }
 
     // =================== الإجازات ===================

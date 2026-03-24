@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // الموظفون
     Route::get('v1/employees', [Api\PublicApiController::class, 'employeeIndex']);
+    Route::post('v1/employees', [Api\PublicApiController::class, 'employeeStore']);
     Route::get('v1/employees/{employee}', [Api\PublicApiController::class, 'employeeShow']);
 
     // الفروع
