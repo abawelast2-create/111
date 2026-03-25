@@ -46,7 +46,7 @@ class EmployeeController extends Controller
             'job_title'    => $request->job_title,
             'phone'        => $request->phone,
             'branch_id'    => $request->branch_id,
-            'pin'          => Employee::generateUniquePin(),
+            'pin'          => Employee::generatePinFromPhone($request->phone),
             'unique_token' => Employee::generateUniqueToken(),
         ]);
 

@@ -134,6 +134,20 @@ class Employee extends Model
         return $token;
     }
 
+    public static function generatePinFromPhone(?string $phone): string
+    {
+        if ($phone) {
+            $digits = preg_replace('/[^0-9]/', '', $phone);
+            if (strlen($digits) >= 4) {
+                $pin = substr($digits, -4);
+                if (!static::withTrashed()->where('pin', $pin)->exists()) {
+                    return $pin;
+                }
+            }
+        }
+        return static::generateUniquePin();
+    }
+
     public static function generateUniquePin(): string
     {
         do {

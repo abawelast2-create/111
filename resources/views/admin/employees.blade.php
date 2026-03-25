@@ -25,6 +25,7 @@
                 <th>#</th>
                 <th>الاسم</th>
                 <th>الوظيفة</th>
+                <th>PIN</th>
                 <th>الهاتف</th>
                 <th>الحالة</th>
                 <th>الفرع</th>
@@ -38,7 +39,7 @@
             @if($emp->branch_id !== $prevBranch)
                 @php $prevBranch = $emp->branch_id; @endphp
                 <tr class="branch-separator" data-branch="{{ $emp->branch_id }}">
-                    <td colspan="8" style="background:var(--primary-l);color:var(--primary-d);font-weight:700;font-size:.82rem">
+                    <td colspan="9" style="background:var(--primary-l);color:var(--primary-d);font-weight:700;font-size:.82rem">
                         <x-icon name="branch" :size="14"/> {{ $emp->branch->name ?? 'بدون فرع' }}
                     </td>
                 </tr>
@@ -47,6 +48,7 @@
                 <td>{{ $emp->id }}</td>
                 <td><strong>{{ $emp->name }}</strong></td>
                 <td>{{ $emp->job_title }}</td>
+                <td style="direction:ltr;font-family:monospace;font-weight:600;letter-spacing:2px">{{ $emp->pin }}</td>
                 <td style="direction:ltr">{{ $emp->phone ?? '-' }}</td>
                 <td><span class="badge {{ $emp->is_active ? 'badge-green' : 'badge-red' }}">{{ $emp->is_active ? 'نشط' : 'معطل' }}</span></td>
                 <td>{{ $emp->branch->name ?? '-' }}</td>
